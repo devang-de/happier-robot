@@ -2,6 +2,10 @@
 
 **Built at TUM.AI Hackathon 2025** | Powered by [HappyRobot](https://happyrobot.ai) + [Cognee](https://cognee.ai) + [ElevenLabs](https://elevenlabs.io)
 
+## Demo Video
+
+https://github.com/user-attachments/assets/ce06a854-5bab-439e-be6a-9ef388916c46
+
 ## What is it?
 
 Happier Robot is an **end-to-end autonomous AI sales agent system** that handles the entire sales cycle — from first contact to deal closure — with zero manual intervention. It learns from every interaction and gets smarter over time.
