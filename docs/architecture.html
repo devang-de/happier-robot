@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happier Robot — Solution Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111118;
+    --card: #1a1a24;
+    --card-border: #2a2a3a;
+    --orange: #ff982f;
+    --green: #67d59c;
+    --blue: #6bb3ff;
+    --text: #e8e8f0;
+    --text-muted: #9999aa;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    line-height: 1.7;
+    padding: 60px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .header h1 {
+    font-size: 2.4em;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 span { color: var(--orange); }
+
+  .header .subtitle {
+    font-size: 1em;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .section {
+    margin-bottom: 50px;
+  }
+
+  .section h2 {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--orange);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: var(--orange);
+    border-radius: 2px;
+  }
+
+  .section p {
+    font-size: 0.95em;
+    color: var(--text);
+    max-width: 800px;
+  }
+
+  .diagram-container {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 20px;
+    overflow-x: auto;
+  }
+
+  .quality-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .quality-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .quality-card .number {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  .quality-card .label {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .tech-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 0.9em;
+  }
+
+  .tech-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--card);
+    color: var(--orange);
+    font-weight: 600;
+    border-bottom: 2px solid var(--card-border);
+  }
+
+  .tech-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text);
+  }
+
+  .tech-table tr:last-child td { border-bottom: none; }
+
+  .guardrail-bar {
+    display: flex;
+    gap: 0;
+    margin-top: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 40px;
+    font-size: 0.8em;
+    font-weight: 600;
+  }
+
+  .guardrail-bar div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg);
+  }
+
+  .guardrail-safe { background: var(--green); flex: 1; }
+  .guardrail-escalate { background: var(--orange); flex: 1.5; }
+  .guardrail-refuse { background: #ff5555; flex: 1; }
+
+  @media print {
+    body {
+      background: #ffffff;
+      color: #222222;
+      padding: 30px;
+    }
+    .header h1 { color: #111111; }
+    .header h1 span { color: #cc7a25; }
+    .header .subtitle { color: #666666; }
+    .section h2 { color: #cc7a25; }
+    .section h2::before { background: #cc7a25; }
+    .section p { color: #333333; }
+    .diagram-container {
+      background: #f8f8f8;
+      border-color: #dddddd;
+    }
+    .quality-card {
+      background: #f8f8f8;
+      border-color: #dddddd;
+    }
+    .quality-card .number { color: #cc7a25; }
+    .quality-card .label { color: #666666; }
+    .tech-table th {
+      background: #f0f0f0;
+      color: #cc7a25;
+    }
+    .tech-table td {
+      color: #333333;
+      border-color: #dddddd;
+    }
+    .tech-table th { border-color: #cccccc; }
+    svg text { fill: #222222 !important; }
+    svg rect[fill="#1a1a24"], svg rect[fill="#111118"] { fill: #f0f0f0 !important; stroke: #cccccc !important; }
+    svg rect[fill="#22222e"] { fill: #f5f5f5 !important; stroke: #cccccc !important; }
+    svg line, svg path { opacity: 0.8; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Happier <span>Robot</span> — Autonomous AI Sales Agent with a Brain</h1>
+  <p class="subtitle">TUM.AI x HappyRobot Hackathon 2025 &nbsp;|&nbsp; Devang Dhumal</p>
+</div>
+
+<!-- Section 1: Solution Overview -->
+<div class="section">
+  <h2>Solution Overview</h2>
+  <p>
+    Happier Robot is an end-to-end autonomous AI sales agent system that handles the entire B2B sales cycle — from first contact to deal closure — without manual intervention. Six production workflows on HappyRobot orchestrate inbound/outbound calls, emails, scheduling, and human-in-the-loop escalation. A self-learning brain powered by Cognee stores and recalls lead context, negotiation patterns, and product knowledge, making the agent smarter with every interaction. Quality is enforced by 50 northstars, 15 adversarial tests, and strict negotiation guardrails.
+  </p>
+</div>
+
+<!-- Section 2: Architecture Diagram -->
+<div class="section">
+  <h2>System Architecture</h2>
+  <div class="diagram-container">
+    <svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="Manrope, sans-serif">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#22222e"/>
+          <stop offset="100%" stop-color="#1a1a24"/>
+        </linearGradient>
+        <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#ff982f"/>
+        </marker>
+        <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#67d59c"/>
+        </marker>
+        <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#6bb3ff"/>
+        </marker>
+      </defs>
+
+      <!-- Top Layer: React Dashboard -->
+      <rect x="150" y="20" width="700" height="90" rx="12" fill="url(#cardGrad)" stroke="#ff982f" stroke-width="1.5" opacity="0.95"/>
+      <text x="500" y="48" text-anchor="middle" fill="#ff982f" font-size="14" font-weight="700">REACT DASHBOARD</text>
+      <g font-size="11" fill="#9999aa">
+        <rect x="185" y="60" width="90" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="230" y="79" text-anchor="middle" fill="#e8e8f0">Pipeline</text>
+        <rect x="290" y="60" width="90" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="335" y="79" text-anchor="middle" fill="#e8e8f0">Calls</text>
+        <rect x="395" y="60" width="90" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="440" y="79" text-anchor="middle" fill="#e8e8f0">Emails</text>
+        <rect x="500" y="60" width="110" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="555" y="79" text-anchor="middle" fill="#e8e8f0">HITL Queries</text>
+        <rect x="625" y="60" width="110" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="680" y="79" text-anchor="middle" fill="#e8e8f0">Agent Brain</text>
+      </g>
+
+      <!-- Arrow: Dashboard → Platform -->
+      <line x1="500" y1="110" x2="500" y2="150" stroke="#ff982f" stroke-width="2" marker-end="url(#arrowOrange)"/>
+
+      <!-- Middle Layer: HappyRobot Platform -->
+      <rect x="150" y="155" width="700" height="180" rx="12" fill="url(#cardGrad)" stroke="#ff982f" stroke-width="1.5" opacity="0.95"/>
+      <text x="500" y="183" text-anchor="middle" fill="#ff982f" font-size="14" font-weight="700">HAPPYROBOT PLATFORM</text>
+
+      <!-- Row 1 -->
+      <rect x="185" y="200" width="150" height="40" rx="8" fill="#22222e" stroke="#ff982f" stroke-width="1"/>
+      <text x="260" y="225" text-anchor="middle" fill="#e8e8f0" font-size="12" font-weight="600">Inbound Call</text>
+
+      <rect x="370" y="200" width="150" height="40" rx="8" fill="#22222e" stroke="#ff982f" stroke-width="1"/>
+      <text x="445" y="225" text-anchor="middle" fill="#e8e8f0" font-size="12" font-weight="600">Outbound Call</text>
+
+      <rect x="555" y="200" width="150" height="40" rx="8" fill="#22222e" stroke="#ff982f" stroke-width="1"/>
+      <text x="630" y="225" text-anchor="middle" fill="#e8e8f0" font-size="12" font-weight="600">Inbound Email</text>
+
+      <!-- Row 2 -->
+      <rect x="185" y="265" width="150" height="40" rx="8" fill="#22222e" stroke="#ff982f" stroke-width="1"/>
+      <text x="260" y="290" text-anchor="middle" fill="#e8e8f0" font-size="12" font-weight="600">Outbound Email</text>
+
+      <rect x="370" y="265" width="150" height="40" rx="8" fill="#22222e" stroke="#ff982f" stroke-width="1"/>
+      <text x="445" y="290" text-anchor="middle" fill="#e8e8f0" font-size="12" font-weight="600">Scheduler</text>
+
+      <rect x="555" y="265" width="150" height="40" rx="8" fill="#22222e" stroke="#ff982f" stroke-width="1"/>
+      <text x="630" y="290" text-anchor="middle" fill="#e8e8f0" font-size="12" font-weight="600">HITL (Slack)</text>
+
+      <!-- Scheduler arrows to Outbound Call & Outbound Email -->
+      <line x1="407" y1="270" x2="370" y2="245" stroke="#67d59c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowGreen)"/>
+      <line x1="407" y1="285" x2="335" y2="285" stroke="#67d59c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowGreen)"/>
+      <text x="360" y="260" fill="#67d59c" font-size="9" font-weight="500">triggers</text>
+
+      <!-- Left Side: Twin DB -->
+      <rect x="20" y="400" width="180" height="120" rx="12" fill="url(#cardGrad)" stroke="#67d59c" stroke-width="1.5"/>
+      <text x="110" y="428" text-anchor="middle" fill="#67d59c" font-size="14" font-weight="700">TWIN DB</text>
+      <rect x="40" y="445" width="140" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+      <text x="110" y="464" text-anchor="middle" fill="#e8e8f0" font-size="11">leads</text>
+      <rect x="40" y="480" width="140" height="28" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+      <text x="110" y="499" text-anchor="middle" fill="#e8e8f0" font-size="11">open_points</text>
+
+      <!-- Right Side: Cognee Brain -->
+      <rect x="800" y="370" width="180" height="190" rx="12" fill="url(#cardGrad)" stroke="#67d59c" stroke-width="1.5"/>
+      <text x="890" y="398" text-anchor="middle" fill="#67d59c" font-size="14" font-weight="700">COGNEE BRAIN</text>
+      <rect x="820" y="412" width="140" height="26" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+      <text x="890" y="430" text-anchor="middle" fill="#e8e8f0" font-size="10">lead_context</text>
+      <rect x="820" y="445" width="140" height="26" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+      <text x="890" y="463" text-anchor="middle" fill="#e8e8f0" font-size="10">negotiation_brain</text>
+      <rect x="820" y="478" width="140" height="26" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+      <text x="890" y="496" text-anchor="middle" fill="#e8e8f0" font-size="10">brain_patterns</text>
+      <rect x="820" y="511" width="140" height="26" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+      <text x="890" y="529" text-anchor="middle" fill="#e8e8f0" font-size="10">product_knowledge</text>
+
+      <!-- Arrows: Platform → Twin DB -->
+      <line x1="250" y1="335" x2="140" y2="395" stroke="#67d59c" stroke-width="2" marker-end="url(#arrowGreen)"/>
+      <text x="170" y="360" fill="#67d59c" font-size="9" font-weight="500">read/write</text>
+
+      <!-- Arrows: Platform → Cognee Brain -->
+      <line x1="700" y1="335" x2="840" y2="395" stroke="#67d59c" stroke-width="2" marker-end="url(#arrowGreen)"/>
+      <text x="780" y="360" fill="#67d59c" font-size="9" font-weight="500">recall/learn</text>
+
+      <!-- Bottom Layer: Integrations -->
+      <rect x="200" y="610" width="600" height="90" rx="12" fill="url(#cardGrad)" stroke="#6bb3ff" stroke-width="1.5"/>
+      <text x="500" y="638" text-anchor="middle" fill="#6bb3ff" font-size="14" font-weight="700">INTEGRATIONS</text>
+
+      <g font-size="11">
+        <rect x="240" y="650" width="80" height="30" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="280" y="670" text-anchor="middle" fill="#e8e8f0">Slack</text>
+        <rect x="340" y="650" width="80" height="30" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="380" y="670" text-anchor="middle" fill="#e8e8f0">Gmail</text>
+        <rect x="440" y="650" width="80" height="30" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="480" y="670" text-anchor="middle" fill="#e8e8f0">Twilio</text>
+        <rect x="540" y="650" width="100" height="30" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="590" y="670" text-anchor="middle" fill="#e8e8f0">ElevenLabs</text>
+        <rect x="660" y="650" width="100" height="30" rx="6" fill="#22222e" stroke="#2a2a3a"/>
+        <text x="710" y="670" text-anchor="middle" fill="#e8e8f0">Cognee API</text>
+      </g>
+
+      <!-- Arrows: Platform → Integrations -->
+      <line x1="500" y1="335" x2="500" y2="605" stroke="#6bb3ff" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowBlue)"/>
+
+      <!-- Arrows: Twin DB → Integrations -->
+      <path d="M 110 520 L 110 650 L 195 650" stroke="#6bb3ff" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arrowBlue)"/>
+
+      <!-- Arrows: Cognee → Platform -->
+      <path d="M 890 560 L 890 590 L 805 590" stroke="#67d59c" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Section 3: Lead Journey Flow -->
+<div class="section">
+  <h2>Lead Journey Flow</h2>
+  <div class="diagram-container">
+    <svg viewBox="0 0 1000 680" xmlns="http://www.w3.org/2000/svg" font-family="Manrope, sans-serif">
+      <defs>
+        <marker id="arrowDown" markerWidth="8" markerHeight="6" refX="4" refY="6" orient="auto">
+          <polygon points="0 0, 8 0, 4 6" fill="#ff982f"/>
+        </marker>
+      </defs>
+
+      <!-- Timeline line -->
+      <line x1="120" y1="30" x2="120" y2="650" stroke="#2a2a3a" stroke-width="2"/>
+
+      <!-- Step 1 -->
+      <circle cx="120" cy="50" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="55" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">1</text>
+      <rect x="160" y="32" width="780" height="40" rx="8" fill="#1a1a24" stroke="#ff982f" stroke-width="1"/>
+      <text x="180" y="57" fill="#e8e8f0" font-size="12" font-weight="600">Phone rings</text>
+      <rect x="620" y="38" width="140" height="28" rx="6" fill="#22222e" stroke="#ff982f" stroke-width="0.5"/>
+      <text x="690" y="57" text-anchor="middle" fill="#ff982f" font-size="11" font-weight="600">Inbound Call</text>
+
+      <!-- Step 2 -->
+      <circle cx="120" cy="120" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="125" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">2</text>
+      <rect x="160" y="102" width="780" height="40" rx="8" fill="#1a1a24" stroke="#67d59c" stroke-width="1"/>
+      <text x="180" y="127" fill="#e8e8f0" font-size="12" font-weight="600">Agent qualifies lead (BANT) &rarr; Post-call extract &rarr; Twin DB updated</text>
+      <rect x="750" y="108" width="100" height="28" rx="6" fill="#22222e" stroke="#67d59c" stroke-width="0.5"/>
+      <text x="800" y="127" text-anchor="middle" fill="#67d59c" font-size="11" font-weight="600">Twin DB</text>
+
+      <!-- Step 3 -->
+      <circle cx="120" cy="190" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="195" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">3</text>
+      <rect x="160" y="172" width="780" height="40" rx="8" fill="#1a1a24" stroke="#ff982f" stroke-width="1"/>
+      <text x="180" y="197" fill="#e8e8f0" font-size="12" font-weight="600">Scheduler triggers &rarr; Outbound Email sent (demo confirmation)</text>
+      <rect x="620" y="178" width="140" height="28" rx="6" fill="#22222e" stroke="#ff982f" stroke-width="0.5"/>
+      <text x="690" y="197" text-anchor="middle" fill="#ff982f" font-size="11" font-weight="600">Outbound Email</text>
+
+      <!-- Step 4 -->
+      <circle cx="120" cy="260" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="265" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">4</text>
+      <rect x="160" y="242" width="780" height="40" rx="8" fill="#1a1a24" stroke="#ff982f" stroke-width="1"/>
+      <text x="180" y="267" fill="#e8e8f0" font-size="12" font-weight="600">Lead replies &rarr; Inbound Email &rarr; Auto-reply or escalate</text>
+      <rect x="620" y="248" width="140" height="28" rx="6" fill="#22222e" stroke="#ff982f" stroke-width="0.5"/>
+      <text x="690" y="267" text-anchor="middle" fill="#ff982f" font-size="11" font-weight="600">Inbound Email</text>
+
+      <!-- Step 5 -->
+      <circle cx="120" cy="330" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="335" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">5</text>
+      <rect x="160" y="312" width="780" height="40" rx="8" fill="#1a1a24" stroke="#ff982f" stroke-width="1"/>
+      <text x="180" y="337" fill="#e8e8f0" font-size="12" font-weight="600">Scheduler triggers &rarr; Outbound Call (negotiation phase)</text>
+      <rect x="620" y="318" width="140" height="28" rx="6" fill="#22222e" stroke="#ff982f" stroke-width="0.5"/>
+      <text x="690" y="337" text-anchor="middle" fill="#ff982f" font-size="11" font-weight="600">Outbound Call</text>
+
+      <!-- Step 6 -->
+      <circle cx="120" cy="400" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="405" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">6</text>
+      <rect x="160" y="382" width="780" height="40" rx="8" fill="#1a1a24" stroke="#6bb3ff" stroke-width="1"/>
+      <text x="180" y="407" fill="#e8e8f0" font-size="12" font-weight="600">Agent escalates question &rarr; HITL Outbound &rarr; Slack notification</text>
+      <rect x="620" y="388" width="140" height="28" rx="6" fill="#22222e" stroke="#6bb3ff" stroke-width="0.5"/>
+      <text x="690" y="407" text-anchor="middle" fill="#6bb3ff" font-size="11" font-weight="600">HITL Outbound</text>
+
+      <!-- Step 7 -->
+      <circle cx="120" cy="470" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="475" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">7</text>
+      <rect x="160" y="452" width="780" height="40" rx="8" fill="#1a1a24" stroke="#6bb3ff" stroke-width="1"/>
+      <text x="180" y="477" fill="#e8e8f0" font-size="12" font-weight="600">Human answers in Slack &rarr; HITL Inbound &rarr; Update Twin DB</text>
+      <rect x="620" y="458" width="140" height="28" rx="6" fill="#22222e" stroke="#6bb3ff" stroke-width="0.5"/>
+      <text x="690" y="477" text-anchor="middle" fill="#6bb3ff" font-size="11" font-weight="600">HITL Inbound</text>
+
+      <!-- Step 8 -->
+      <circle cx="120" cy="540" r="16" fill="#ff982f" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="545" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">8</text>
+      <rect x="160" y="522" width="780" height="40" rx="8" fill="#1a1a24" stroke="#ff982f" stroke-width="1"/>
+      <text x="180" y="547" fill="#e8e8f0" font-size="12" font-weight="600">Scheduler triggers &rarr; Outbound Email (deliver answer to lead)</text>
+      <rect x="620" y="528" width="140" height="28" rx="6" fill="#22222e" stroke="#ff982f" stroke-width="0.5"/>
+      <text x="690" y="547" text-anchor="middle" fill="#ff982f" font-size="11" font-weight="600">Outbound Email</text>
+
+      <!-- Step 9 -->
+      <circle cx="120" cy="610" r="16" fill="#67d59c" stroke="#111118" stroke-width="3"/>
+      <text x="120" y="615" text-anchor="middle" fill="#111118" font-size="11" font-weight="700">9</text>
+      <rect x="160" y="592" width="780" height="40" rx="8" fill="#1a1a24" stroke="#67d59c" stroke-width="1"/>
+      <text x="180" y="617" fill="#e8e8f0" font-size="12" font-weight="600">Deal won &rarr; Cognee learns patterns for future leads</text>
+      <rect x="620" y="598" width="140" height="28" rx="6" fill="#22222e" stroke="#67d59c" stroke-width="0.5"/>
+      <text x="690" y="617" text-anchor="middle" fill="#67d59c" font-size="11" font-weight="600">Cognee Brain</text>
+    </svg>
+  </div>
+</div>
+
+<!-- Section 4: Quality System -->
+<div class="section">
+  <h2>Quality System</h2>
+  <div class="quality-grid">
+    <div class="quality-card">
+      <div class="number">50</div>
+      <div class="label">Northstars<br><span style="font-size:0.9em">25 per voice agent</span></div>
+    </div>
+    <div class="quality-card">
+      <div class="number">15</div>
+      <div class="label">Adversarial Tests<br><span style="font-size:0.9em">across 4 suites</span></div>
+    </div>
+    <div class="quality-card">
+      <div class="number">4</div>
+      <div class="label">Custom Eval<br><span style="font-size:0.9em">scenarios</span></div>
+    </div>
+    <div class="quality-card">
+      <div class="number">6</div>
+      <div class="label">Production<br><span style="font-size:0.9em">workflows</span></div>
+    </div>
+  </div>
+
+  <p style="margin-top: 20px; font-weight: 600; margin-bottom: 8px;">Negotiation Guardrails</p>
+  <div class="guardrail-bar">
+    <div class="guardrail-safe">&le;10% &mdash; Safe to approve</div>
+    <div class="guardrail-escalate">10&ndash;25% &mdash; Escalate to human</div>
+    <div class="guardrail-refuse">&gt;25% &mdash; Refuse</div>
+  </div>
+</div>
+
+<!-- Section 5: Tech Stack -->
+<div class="section">
+  <h2>Tech Stack</h2>
+  <table class="tech-table">
+    <thead>
+      <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Workflow Orchestration</td><td>HappyRobot</td><td>6 production workflows (calls, emails, scheduler, HITL)</td></tr>
+      <tr><td>Agent Memory</td><td>Cognee</td><td>Knowledge graph, 4 datasets, recall/learn API</td></tr>
+      <tr><td>Voice</td><td>ElevenLabs</td><td>TTS narration for submission video</td></tr>
+      <tr><td>Telephony</td><td>Twilio</td><td>Inbound/outbound voice calls</td></tr>
+      <tr><td>Email</td><td>Gmail API</td><td>Inbound/outbound email workflows</td></tr>
+      <tr><td>HITL Channel</td><td>Slack</td><td>Human-in-the-loop escalation and answers</td></tr>
+      <tr><td>Structured Data</td><td>Twin DB</td><td>Lead records, open points tracking</td></tr>
+      <tr><td>Frontend</td><td>React + Vite</td><td>Dashboard with pipeline, calls, emails, brain UI</td></tr>
+      <tr><td>Quality</td><td>HappyRobot Evals</td><td>Northstars, adversarial suites, custom evals</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

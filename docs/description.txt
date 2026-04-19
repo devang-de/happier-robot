@@ -1,0 +1,15 @@
+Happier Robot is an autonomous AI sales agent system that handles the entire B2B sales cycle — from first contact to deal closure — with zero manual intervention.
+
+Built on 6 production workflows on HappyRobot, the system orchestrates inbound/outbound voice calls, email campaigns, a 15-minute scheduler, and human-in-the-loop escalation via Slack.
+
+The agent's self-learning brain, powered by Cognee, stores lead context, negotiation history, and generalizable sales patterns across 4 memory datasets. Every interaction teaches the agent — the next prospect gets a smarter conversation from day one.
+
+Quality is enforced by 50 northstars, 15 adversarial red-team tests, and strict negotiation guardrails (discount boundaries, product claim verification, escalation protocols).
+
+ElevenLabs provides professional narration for the submission video, generated programmatically via the TTS API.
+
+The React dashboard offers real-time pipeline tracking, call transcripts, email threads, HITL query management, and an Agent Brain page for querying the Cognee knowledge graph.
+
+Key integrations: HappyRobot (workflows), Cognee (memory), ElevenLabs (narration), Slack (HITL), Gmail (email), Twin DB (structured data).
+
+Built solo in 24 hours at the TUM.AI x HappyRobot Hackathon 2025.
