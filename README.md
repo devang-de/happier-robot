@@ -149,6 +149,29 @@ cd video && npx remotion studio src/index.ts
 npx remotion render src/index.ts HappierRobotV1Short happier_robot.mp4
 ```
 
+## Quick Start
+
+### Dashboard
+```bash
+cd dashboard
+npm install
+# Create .env with your API keys
+echo "VITE_HAPPYROBOT_API_KEY=your_key_here" > .env
+echo "VITE_COGNEE_API_KEY=your_key_here" >> .env
+echo "VITE_COGNEE_TENANT_ID=your_tenant_id" >> .env
+npm run dev
+# Open http://localhost:5173
+```
+
+### Video (Remotion)
+```bash
+cd video
+npm install
+npx remotion studio src/index.ts
+# Open http://localhost:3000
+# Render: npx remotion render src/index.ts HappierRobotV1Short out.mp4
+```
+
 ## Tech Stack
 
 | Component | Technology |
