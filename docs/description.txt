@@ -1,6 +1,6 @@
 Happier Robot is an autonomous AI sales agent system that handles the entire B2B sales cycle — from first contact to deal closure — with zero manual intervention.
 
-Built on 6 production workflows on HappyRobot, the system orchestrates inbound/outbound voice calls, email campaigns, a 15-minute scheduler, and human-in-the-loop escalation via Slack.
+Built on 6 production workflows under the "Happier Robot" workspace on the HappyRobot platform (EU cluster, TUM.AI org), the system orchestrates inbound/outbound voice calls, email campaigns, a 15-minute scheduler, and human-in-the-loop escalation via Slack.
 
 The agent's self-learning brain, powered by Cognee, stores lead context, negotiation history, and generalizable sales patterns across 4 memory datasets. Every interaction teaches the agent — the next prospect gets a smarter conversation from day one.
 
